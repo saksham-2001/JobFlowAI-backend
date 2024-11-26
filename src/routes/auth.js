@@ -1,12 +1,13 @@
 const express = require('express');
+require('dotenv').config();
 const crypto = require('crypto');
 const bcrypt = require('bcrypt');
 const User = require("../models/user.model");
+const jwt = require('jsonwebtoken');
 
-let sessionID = [];
 
 const router = express.Router();
-
+const SECRET_KEY = process.env.SECRET_KEY;
 
 
 
@@ -56,22 +57,12 @@ const login = async function (req, res, next) {
 //middleware to create session
 const createSession = function (req, res) {
     const { email, password } = req.body;
-    let sessionkey = crypto.randomBytes(16).toString('hex');
-    let newsessionID = {
-        key: sessionkey,
-        value: email
-    };
-    sessionID.push(newsessionID);
 
+    const sessiontoken = jwt.sign({ email }, SECRET_KEY, { expiresIn: '1h' });
 
-    res.cookie('session', sessionkey, {
+    res.cookie('session', sessiontoken, {
 
         httpOnly: true,
-        secure: true,
-        sameSite: 'Strict',
-        maxAge: 3600000 // Cookie expiration in milliseconds (1 hour)
-
-
     }).send({ success: true, message: "Cookie is set" });
 }
 
@@ -104,35 +95,42 @@ router.post('/login', [login, createSession]
 //'/isauth' request handle
 router.get('/isauth', async (req, res) => {
 
-    const sessioncookie = req.cookies['session'];
-    const sessionObj=sessionID.find(item => item.key === sessioncookie)
-    if (sessionObj) {
-          
-      
-        try{
-         const user=await User.findOne({email: sessionObj.value});
+    const sessiontoken = req.cookies['session'];
+
+    if (sessiontoken) {
+
+        try {
+            const decoded = jwt.verify(sessiontoken, SECRET_KEY); // Decode the token
+            const email = decoded.email; // Extract email from payload
         
-         return res.status(200).send({ name:user.name, success: true, message: "userexists" });
+            const user = await User.findOne({ email: email }); // Query the database
+            if (!user) {
+                return res.status(404).send({ success: false, message: "User not found" });
+            }
+        
+            return res.status(200).send({
+                name: user.name,
+                success: true,
+                message: "The user is in session"
+            });
+        } catch (error) {
+            return res.status(401).send({ success: false, message: "Invalid session token", error: error.message });
         }
-        catch(error){
-          throw error;
-        }
+        
+       
     }
-    else{
-        return res.send({success:false, message:"The user does not exist"});
+    else {
+        return res.send({ success: false, message: "The user is out of session" });
     }
 
 });
 
 // '/logout' request handle
 
-router.get('/logout', async(req, res)=>{
-    const sessioncookie = req.cookies['session'];
-    res.clearCookie('session', {path: '/'});
-  sessionID =sessionID.filter(item=> item.key !==sessioncookie );
-   
-
-    res.send({success:true, message:"Cookie Cleared"})
+router.get('/logout', async (req, res) => {
+    //const sessioncookie = req.cookies['session'];
+    res.clearCookie('session', { path: '/' });
+        res.send({ success: true, message: "Cookie Cleared" })
 })
 
 
