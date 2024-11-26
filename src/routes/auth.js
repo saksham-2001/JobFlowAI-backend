@@ -4,13 +4,13 @@ const crypto = require('crypto');
 const bcrypt = require('bcrypt');
 const User = require("../models/user.model");
 const jwt = require('jsonwebtoken');
-
+const OAuthRouter =require("./OAuth.js")
 
 const router = express.Router();
 const SECRET_KEY = process.env.SECRET_KEY;
 
 
-
+router.use('/google', OAuthRouter);
 
 
 //middleware to handle login
