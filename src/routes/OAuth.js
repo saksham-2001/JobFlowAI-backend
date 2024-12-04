@@ -21,7 +21,7 @@ OAuthRouter.get('/Callback', async (req, res) => {
   }
 
   try {
-
+      
     // post reuest to google API to get tokens in exchange for the authorization code
     const response = await axios.post('https://oauth2.googleapis.com/token', {
       code,
@@ -58,16 +58,38 @@ OAuthRouter.get('/Callback', async (req, res) => {
     }
     const sessiontoken = jwt.sign({ email }, SECRET_KEY, { expiresIn: '1h' });
 
-    res.cookie('session', sessiontoken, {
+    // res.cookie('session', sessiontoken, {
 
+    //   httpOnly: true,
+    //   secure: false,
+    //   samesite: 'none',
+
+    // }).send({ success: true, message: "Cookie is set" });
+    res.cookie('session', sessiontoken, {
       httpOnly: true,
-    }).send({ success: true, message: "Cookie is set" });
+      secure: true,
+      sameSite: 'none',
+    }).send(`
+      <html>
+        <head>
+          <meta http-equiv="refresh" content="0;url=http://localhost:3000">
+        </head>
+        <body>
+          Redirecting...
+        </body>
+      </html>
+    `);
     //res.json({ success: true, message: "Signed up successfully. Please login." });
 
 
   }
   catch (error) {
-    throw error;
+    console.error('OAuth Callback Error:', error.response?.data || error.message);
+  return res.status(500).json({ 
+    success: false, 
+    message: 'Authentication failed',
+    error: error.response?.data || error.message 
+  });
   }
 
 })

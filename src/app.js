@@ -10,7 +10,11 @@ app.use(cookieParser());
 app.use(express.json());
 app.use(cors({
     origin: 'http://localhost:3000', // Client's URL
-    credentials: true,               // Allow cookies to be sent with requests
+    
+    //origin: "https://16f0-49-178-113-21.ngrok-free.app",
+   // origin: 'https://saksham-2001.github.io',
+  methods: 'GET,POST,PUT,DELETE',
+  credentials: true,
 }));
 app.use('/auth', authRoutes);
 app.get('/', (req, res)=>{

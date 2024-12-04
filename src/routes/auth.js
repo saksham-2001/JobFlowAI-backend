@@ -63,6 +63,10 @@ const createSession = function (req, res) {
     res.cookie('session', sessiontoken, {
 
         httpOnly: true,
+        secure: true,
+        sameSite: 'none',
+        maxAge: 3600000 //1hr in ms
+
     }).send({ success: true, message: "Cookie is set" });
 }
 
@@ -129,7 +133,11 @@ router.get('/isauth', async (req, res) => {
 
 router.get('/logout', async (req, res) => {
     //const sessioncookie = req.cookies['session'];
-    res.clearCookie('session', { path: '/' });
+    res.clearCookie('session', { 
+        httpOnly: true,
+        secure: true,
+        sameSite: 'none', 
+        path: '/' });
         res.send({ success: true, message: "Cookie Cleared" })
 })
 
