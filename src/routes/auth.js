@@ -53,6 +53,29 @@ const login = async function (req, res, next) {
 
 }
 
+const checkMFAregsitered= async function (req, res, next){
+const {email} = req.body;
+
+try {
+    // Query the user by email
+    const user = await User.findOne({ email: email });
+
+    if (!user) {
+        return { success: false, message: 'User not found' };
+    }
+
+    // Check the MFAverified field
+    if (user.MFAverified) {
+        return { success: true, isMFARegistered: true, message: 'User is registered for MFA' };
+    } else {
+        return { success: true, isMFARegistered: false, message: 'User is not registered for MFA' };
+    }
+} catch (error) {
+    console.error('Error checking MFA status:', error);
+    return { success: false, message: 'An error occurred while checking MFA status' };
+}
+}
+
 
 //middleware to create session
 const createSession = function (req, res) {
@@ -114,6 +137,7 @@ router.get('/isauth', async (req, res) => {
         
             return res.status(200).send({
                 name: user.name,
+                isregistered: user.MFAregistered,
                 success: true,
                 message: "The user is in session"
             });

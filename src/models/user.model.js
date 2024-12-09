@@ -26,13 +26,22 @@ const userSchema = new Schema(
             trim: true,
             index: true
         },
+        
+        MFAregistered: {
+        type: Boolean,
+        default: false
+        },
+        
+        MFAsecret: {
+       type: String,
 
 
+        },
        
 
         password: {
             type: String,
-            reuired: [true, 'Password is required']  //custom message to display
+            required: [true, 'Password is required']  //custom message to display
 
         },
 

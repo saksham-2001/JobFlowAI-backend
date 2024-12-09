@@ -41,7 +41,8 @@ OAuthRouter.get('/Callback', async (req, res) => {
     console.log('Refresh Token:', refresh_token);
     console.log('Expires In:', expires_in);
 
-    //get request to Google API to get User Profile with the tokens obtained
+    //This step can be avoided as we are not extracting any restricted info such as user's google drive,calender etc. for which access tokens are used.
+    // we just want user name and email which is stored in ID token and can be retreived using google-auth-library.
     const userInfoResponse = await axios.get('https://www.googleapis.com/oauth2/v2/userinfo', {
       headers: {
         Authorization: `Bearer ${access_token}`,
@@ -58,13 +59,7 @@ OAuthRouter.get('/Callback', async (req, res) => {
     }
     const sessiontoken = jwt.sign({ email }, SECRET_KEY, { expiresIn: '1h' });
 
-    // res.cookie('session', sessiontoken, {
 
-    //   httpOnly: true,
-    //   secure: false,
-    //   samesite: 'none',
-
-    // }).send({ success: true, message: "Cookie is set" });
     res.cookie('session', sessiontoken, {
       httpOnly: true,
       secure: true,
