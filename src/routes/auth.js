@@ -5,12 +5,14 @@ const bcrypt = require('bcrypt');
 const User = require("../models/user.model");
 const jwt = require('jsonwebtoken');
 const OAuthRouter =require("./OAuth.js")
+const MfaRouter = require("./MFA.js");
 
 const router = express.Router();
 const SECRET_KEY = process.env.SECRET_KEY;
 
 
 router.use('/google', OAuthRouter);
+router.use('/mfa',  MfaRouter);
 
 
 //middleware to handle login
