@@ -15,22 +15,24 @@ router.use('/google', OAuthRouter);
 router.use('/mfa',  MfaRouter);
 
 
-//middleware to handle login
+/* '/login' route Logic*/
+
+
+
+// Step1: middleware to validate credentials
 const login = async function (req, res, next) {
     const { email, password } = req.body;
 
-
-
     // Validate input
     if (!email || !password) {
-        return res.status(400).json({ message: 'Email and password are required' });
+        return res.status(404).json({ message: 'Email and password are required' });
     }
 
     try {
         // Find user by email
         const user = await User.findOne({ email });
         if (!user) {
-            return res.status(404).json({ message: 'Invalid email or password' });
+            return res.status(401).json({ message: 'Invalid email or password' });
         }
 
         // Compare passwords
@@ -45,15 +47,14 @@ const login = async function (req, res, next) {
 
         }
 
-
-
-
     } catch (err) {
         console.error(err);
         res.status(500).json({ message: 'Server error', error: err.message });
     }
 
 }
+
+//Step2: Middleware to check if user is MFA registered, If yes then return, else next()
 
 const checkMFAregsitered= async function (req, res, next){
 const {email} = req.body;
@@ -81,7 +82,7 @@ try {
 }
 
 
-//middleware to create session
+// Step3: Validation complete. Middleware to create session
 const createSession = function (req, res) {
     const { email, password } = req.body;
 
@@ -97,7 +98,33 @@ const createSession = function (req, res) {
     }).send({ success: true, message: "Cookie is set" });
 }
 
-// '/signup' request handle
+router.post('/login', [login, checkMFAregsitered, createSession]
+);
+
+
+
+
+/*'/logout' request handle */
+
+router.get('/logout', async (req, res) => {
+    //const sessioncookie = req.cookies['session'];
+    res.clearCookie('session', { 
+        httpOnly: true,
+        secure: true,
+        sameSite: 'none', 
+        path: '/' });
+        res.send({ success: true, message: "Cookie Cleared" })
+})
+
+
+
+
+
+
+
+/* '/signup' request handle*/
+
+
 router.post('/signup', async (req, res) => {
     const { name, email, password } = req.body;
     try {
@@ -119,11 +146,12 @@ router.post('/signup', async (req, res) => {
     }
 });
 
-// '/login request handle'
-router.post('/login', [login, checkMFAregsitered, createSession]
-);
 
-//'/isauth' request handle
+
+
+
+
+/* '/isauth' request handle */
 router.get('/isauth', async (req, res) => {
 
     const sessiontoken = req.cookies['session'];
@@ -157,17 +185,7 @@ router.get('/isauth', async (req, res) => {
 
 });
 
-// '/logout' request handle
 
-router.get('/logout', async (req, res) => {
-    //const sessioncookie = req.cookies['session'];
-    res.clearCookie('session', { 
-        httpOnly: true,
-        secure: true,
-        sameSite: 'none', 
-        path: '/' });
-        res.send({ success: true, message: "Cookie Cleared" })
-})
 
 
 

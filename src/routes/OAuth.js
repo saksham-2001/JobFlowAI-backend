@@ -10,6 +10,8 @@ const REDIRECT_URL = process.env.REDIRECT_URL;
 const SECRET_KEY = process.env.SECRET_KEY;
 const OAuthRouter = express.Router();
 const jwt = require('jsonwebtoken');
+const RESPONSE_PROD_URL= "https://saksham-2001.github.io/JobFlowAi-front-end";
+const RESPONSE_LOCAL_URL= "http://localhost:3000";
 const client = new OAuth2Client(CLIENT_ID, CLIENT_SECRET, REDIRECT_URL);
 
 OAuthRouter.get('/Callback', async (req, res) => {
@@ -67,7 +69,7 @@ OAuthRouter.get('/Callback', async (req, res) => {
     }).send(`
       <html>
         <head>
-          <meta http-equiv="refresh" content="0;url=http://localhost:3000">
+          <meta http-equiv="refresh" content="0;url=${RESPONSE_LOCAL_URL}">
         </head>
         <body>
           Redirecting...
