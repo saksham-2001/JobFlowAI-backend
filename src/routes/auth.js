@@ -63,18 +63,20 @@ try {
     const user = await User.findOne({ email: email });
 
     if (!user) {
-        return { success: false, message: 'User not found' };
+        return res.json({ success: false, message: 'User not found' });
     }
 
     // Check the MFAverified field
-    if (user.MFAverified) {
-        return { success: true, isMFARegistered: true, message: 'User is registered for MFA' };
+    if (user.MFAregistered) {
+       return res.json({  isMFARegistered: true, message: 'User is registered for MFA' });
+       console.log("all g");
     } else {
-        return { success: true, isMFARegistered: false, message: 'User is not registered for MFA' };
+        //return { success: true, isMFARegistered: false, message: 'User is not registered for MFA' };
+        next();    
     }
 } catch (error) {
     console.error('Error checking MFA status:', error);
-    return { success: false, message: 'An error occurred while checking MFA status' };
+    return res.json({ success: false, message: 'An error occurred while checking MFA status' });
 }
 }
 
@@ -103,7 +105,7 @@ router.post('/signup', async (req, res) => {
 
         const user = await User.findOne({ email });
         if (user) {
-            res.json({ success: false, message: "User already exists. please login" });
+            res.json({ success: false,  message: "User already exists. please login" });
         }
         else {
             const hashedpassword = await bcrypt.hash(password, 10);
@@ -118,7 +120,7 @@ router.post('/signup', async (req, res) => {
 });
 
 // '/login request handle'
-router.post('/login', [login, createSession]
+router.post('/login', [login, checkMFAregsitered, createSession]
 );
 
 //'/isauth' request handle
