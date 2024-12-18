@@ -169,6 +169,7 @@ router.get('/isauth', async (req, res) => {
         
             return res.status(200).send({
                 name: user.name,
+                email: user.email,
                 isregistered: user.MFAregistered,
                 success: true,
                 message: "The user is in session"

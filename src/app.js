@@ -2,6 +2,7 @@
 const express = require('express');
 const cors = require("cors")
 const authRoutes = require("./routes/auth.js");
+const profileRoutes = require("./routes/profile.js");
 const app = express();
 
 const cookieParser = require('cookie-parser');
@@ -18,9 +19,10 @@ app.use(cors({
   credentials: true,
 }));
 app.use('/auth', authRoutes);
+app.use('/profile', profileRoutes);
 
 app.get('/', (req, res) => {
-  console.log(PROD_CLIENT_URL);
+  console.log(PROD_CLIENT_ORIGIN);
   res.send('<h1>JobOverFlowAI</h1>');
 });
 module.exports = app;
